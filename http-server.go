@@ -7,19 +7,43 @@ import (
 	"os"
 )
 
-func main() {
-	var dir string
+type flags struct {
+	port string
+	addr string
+	dir  string
+}
 
-	port := flag.String("port", "3001", "port in which the server will be listen on.")
-	path := flag.String("path", "", "directory to be serve")
+func main() {
+
+	args := getFlags()
+
+	http.ListenAndServe(fmt.Sprintf("%s:%s", args.addr, args.port), http.FileServer(http.Dir(args.dir)))
+}
+
+func getFlags() (args flags) {
+	port := flag.String("p", "8080", "Port to use")
+	addr := flag.String("a", "0.0.0.0", "Address to use")
+	path := flag.String("path", "./", "directory to be serve")
 
 	flag.Parse()
 
 	if *path == "" {
-		dir, _ = os.Getwd()
+		args.dir, _ = os.Getwd()
 	} else {
-		dir = *path
+		args.dir = *path
 	}
 
-	http.ListenAndServe(fmt.Sprintf(":%s", *port), http.FileServer(http.Dir(dir)))
+	if *port == "" {
+		args.port = "8080"
+	} else {
+		args.port = *port
+	}
+
+	if *addr == "" {
+		args.addr = "0.0.0.0"
+	} else {
+		args.addr = *addr
+	}
+
+	return
 }
