@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 type flags struct {
@@ -14,10 +16,25 @@ type flags struct {
 }
 
 func main() {
+	handlerInterrupt()
 
 	args := getFlags()
 
-	http.ListenAndServe(fmt.Sprintf("%s:%s", args.addr, args.port), http.FileServer(http.Dir(args.dir)))
+	http.ListenAndServe(fmt.Sprintf("%s:%s", args.addr, args.port), server(args))
+}
+
+func handlerInterrupt() {
+	sigs := make(chan os.Signal, 1)
+
+	signal.Notify(sigs, syscall.SIGINT)
+
+	go func() {
+		sig := <-sigs
+		if sig == os.Interrupt {
+			fmt.Println("http-server stopped.")
+			os.Exit(0)
+		}
+	}()
 }
 
 func getFlags() (args flags) {
@@ -46,4 +63,11 @@ func getFlags() (args flags) {
 	}
 
 	return
+}
+
+func server(args flags) http.Handler {
+	fmt.Printf("Starting up http-server, serving %s\n", args.dir)
+	fmt.Printf("Available on:\n http://%s:%s\n", args.addr, args.port)
+	fmt.Println("Hit CTRL-C to stop the server")
+	return http.FileServer(http.Dir(args.dir))
 }
