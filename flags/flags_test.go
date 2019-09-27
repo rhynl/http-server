@@ -1,10 +1,16 @@
 package flags
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGetFlags(t *testing.T) {
-	var expected = Flags{Dir: "./", Port: "8080", Addr: "0.0.0.0"}
-	if observed := GetFlags(); observed != expected {
-		t.Fatalf("GetFlags() = %v, want %v", observed, expected)
+	for _, test := range flagsTestCases {
+		argsv = test.input
+		actual := GetFlags()
+
+		if actual != test.expected {
+			t.Errorf("GetFlags()\nexpected %v\nactual %v", test.expected, actual)
+		}
 	}
 }

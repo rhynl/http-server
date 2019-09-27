@@ -12,28 +12,39 @@ type Flags struct {
 	Dir  string
 }
 
+var argsv []string
+
+const defaultPort = "8080"
+const defaultAddr = "0.0.0.0"
+const defaultPath = "./"
+
 // GetFlags parse the flags passed to the program
 func GetFlags() (args Flags) {
-	port := flag.String("p", "8080", "Port to use")
-	addr := flag.String("a", "0.0.0.0", "Address to use")
-	path := flag.String("path", "./", "directory to be serve")
+	port := flag.String("p", defaultPort, "Port to use")
+	addr := flag.String("a", defaultAddr, "Address to use")
+	path := flag.String("path", defaultPath, "directory to be serve")
 
-	flag.Parse()
+	a := os.Args[1:]
+	if argsv != nil {
+		a = argsv
+	}
+
+	flag.CommandLine.Parse(a)
 
 	if *path == "" {
-		args.Dir, _ = os.Getwd()
+		args.Dir = defaultPath
 	} else {
 		args.Dir = *path
 	}
 
 	if *port == "" {
-		args.Port = "8080"
+		args.Port = defaultPort
 	} else {
 		args.Port = *port
 	}
 
 	if *addr == "" {
-		args.Addr = "0.0.0.0"
+		args.Addr = defaultAddr
 	} else {
 		args.Addr = *addr
 	}
